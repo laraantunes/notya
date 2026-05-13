@@ -2,8 +2,6 @@
 
 Notya is a personal, secure, and highly organized note-taking application built with **PHP** and **HTMX**. It features a stunning **neon purple/pink aesthetic** and organizes notes in a hierarchical structure mirrored directly in your filesystem.
 
-![Notya Preview](https://via.placeholder.com/1200x600?text=Notya+Neon+Editor+Preview) <!-- Replace with real image after deployment -->
-
 ## ✨ Features
 
 - **📂 Deep Hierarchy**: Organize notes into Notebooks and unlimited levels of child notes.
