@@ -1,9 +1,10 @@
 <header id="global-header">
     <div class="header-left">
         <button id="toggle-sidebar" class="icon-btn"><i class="fas fa-bars"></i></button>
-        <h2 class="logo" style="color: var(--accent-pink); font-size: 1.5rem; cursor: pointer; margin-left: 10px;" 
+        <h2 class="logo" style="color: var(--accent-pink); font-size: 1.5rem; cursor: pointer; margin-left: 10px; display: flex; align-items: center; gap: 10px;" 
             hx-get="api.php?action=show_home" hx-target="#editor-content" 
             onclick="window.location.hash = ''; document.querySelectorAll('.tree-header').forEach(h => h.classList.remove('active'));">
+            <img src="img/favicon.png" alt="Notya Logo" style="height: 30px; border-radius: 4px;">
             Notya
         </h2>
     </div>

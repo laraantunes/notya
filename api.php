@@ -443,6 +443,7 @@ switch ($action) {
     case 'show_home':
         echo "<div id='current-path' hx-swap-oob='true'>/ Início</div>";
         echo "<div style='text-align: center; padding: 60px 20px;'>";
+        echo "<img src='img/favicon.png' alt='Notya Logo' style='height: 120px; border-radius: 20px; margin-bottom: 20px; box-shadow: var(--neon-shadow);'>";
         echo "<h1 style='color: var(--accent-pink); font-size: 5rem; text-shadow: var(--neon-shadow); margin-bottom: 10px;'>Notya</h1>";
         echo "<p style='color: var(--text-secondary); font-size: 1.2rem; margin-bottom: 20px;'>Organize seus pensamentos com estilo.</p>";
         
