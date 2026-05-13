@@ -16,6 +16,14 @@ function hideModal() {
     document.getElementById('generic-modal').classList.add('hidden');
 }
 
+// Close modals when clicking outside
+document.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+        if (e.target.id === 'generic-modal') hideModal();
+        if (e.target.id === 'search-modal') toggleSearch();
+    }
+});
+
 // Sidebar toggle
 document.getElementById('toggle-sidebar')?.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('collapsed');
@@ -166,15 +174,36 @@ function initEditor(elementId) {
     easyMDE = new EasyMDE({
         element: el,
         spellChecker: false,
-        autosave: {
-            enabled: false
-        },
+        autosave: { enabled: false },
         status: ["lines", "words", "cursor"],
-        minHeight: "400px"
+        minHeight: "400px",
+        toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "guide"],
+        previewRender: function(plainText) {
+            // Ensure images have the correct base path if needed
+            return this.parent.markdown(plainText);
+        }
     });
     
     // Mark as initialized
     el.EasyMDE = easyMDE;
+}
+
+function toggleEditorView() {
+    if (!easyMDE) return;
+    const btn = document.getElementById('btn-toggle-view');
+    const isPreview = easyMDE.isPreviewActive();
+    
+    if (isPreview) {
+        easyMDE.togglePreview();
+        btn.innerHTML = "<i class='fas fa-eye'></i> Visual";
+        btn.style.borderColor = "var(--accent-purple)";
+        btn.style.color = "var(--accent-purple)";
+    } else {
+        easyMDE.togglePreview();
+        btn.innerHTML = "<i class='fas fa-code'></i> Editor";
+        btn.style.borderColor = "var(--accent-pink)";
+        btn.style.color = "var(--accent-pink)";
+    }
 }
 
 function toggleNode(ev, icon) {

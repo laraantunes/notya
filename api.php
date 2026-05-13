@@ -185,6 +185,35 @@ function get_breadcrumb($rel_path, $is_notebook = false) {
     return implode(" <i class='fas fa-chevron-right' style='font-size: 0.7rem; margin: 0 5px; opacity: 0.5;'></i> ", $breadcrumb);
 }
 
+function render_media_list($rel_path) {
+    $note = find_note_by_rel_path($rel_path);
+    if ($note && is_dir($note['folder'])) {
+        $files = scandir($note['folder']);
+        echo "<ul style='list-style: none; padding: 0;'>";
+        foreach ($files as $file) {
+            if ($file == "." || $file == ".." || str_ends_with($file, '.md')) continue;
+            
+            // Construct the path relative to the root
+            // Note folder is data/notebooks/...
+            $web_path = str_replace(str_replace('\\', '/', __DIR__ . '/'), '', str_replace('\\', '/', $note['folder'])) . "/" . $file;
+            
+            echo "<li style='display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--glass-border); align-items: center;'>";
+            echo "<div style='display: flex; align-items: center; gap: 10px;'>";
+            echo "<i class='fas fa-file' style='color: var(--text-secondary);'></i>";
+            echo "<span>$file</span>";
+            echo "</div>";
+            echo "<div style='display: flex; gap: 15px; align-items: center;'>";
+            echo "<i class='fas fa-copy' title='Copiar URL' onclick='copyToClipboard(\"$web_path\")' style='cursor: pointer; color: var(--accent-purple);'></i>";
+            echo "<i class='fas fa-trash' hx-delete='api.php?action=delete_media&path=$rel_path&file=$file' hx-confirm='Excluir arquivo?' hx-target='#media-list' style='cursor: pointer; color: var(--accent-pink);'></i>";
+            echo "</div>";
+            echo "</li>";
+        }
+        echo "</ul>";
+    } else {
+        echo "<p style='color: var(--text-secondary); padding: 20px; text-align: center;'>Nenhum arquivo de mídia anexado.</p>";
+    }
+}
+
 function render_shortcuts_box() {
     $html = "<div style='display: inline-block; text-align: left; background: var(--glass-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--glass-border); margin-top: 20px;'>";
     $html .= "<h3 style='color: var(--accent-purple); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;'>Atalhos de Teclado</h3>";
@@ -323,6 +352,7 @@ switch ($action) {
             echo "<div style='display: flex; gap: 10px;'>";
             echo "<button onclick='showModal()' hx-get='api.php?action=show_media&path=$rel_path' hx-target='#modal-body' style='background: var(--glass-bg); color: var(--accent-pink);'><i class='fas fa-paperclip'></i> Mídia</button>";
             echo "<button hx-post='api.php?action=save_note&path=$rel_path' hx-vals='js:{content: easyMDE.value(), title: document.getElementById(\"note-title\").value}' hx-target='#notebooks-list'>Salvar Nota</button>";
+            echo "<button id='btn-toggle-view' onclick='toggleEditorView()' style='background: var(--glass-bg); color: var(--accent-purple); border: 1px solid var(--accent-purple); padding: 8px 15px; border-radius: 8px; cursor: pointer;'><i class='fas fa-eye'></i> Visual</button>";
             echo "</div>";
             echo "</div>";
 
@@ -338,34 +368,77 @@ switch ($action) {
         $note = find_note_by_rel_path($rel_path);
         echo "<h3>Mídia desta nota</h3>";
         echo "<div style='margin-bottom: 20px;'>";
-        echo "<form hx-post='api.php?action=upload_media&path=$rel_path' hx-encoding='multipart/form-data' hx-target='#media-list'>";
-        echo "<input type='file' name='media_file' required>";
-        echo "<button type='submit'>Enviar</button>";
+        echo "<div id='drop-zone' style='border: 2px dashed var(--glass-border); padding: 40px; text-align: center; border-radius: 12px; background: var(--glass-bg); cursor: pointer; transition: all 0.3s;'>";
+        echo "<i class='fas fa-cloud-upload-alt' style='font-size: 2rem; color: var(--accent-purple); margin-bottom: 10px;'></i>";
+        echo "<p style='color: var(--text-secondary);'>Arraste arquivos aqui ou clique para selecionar</p>";
+        echo "<form id='media-form' hx-post='api.php?action=upload_media&path=$rel_path' hx-encoding='multipart/form-data' hx-target='#media-list'>";
+        echo "<input type='file' name='media_file' id='media-input' style='display: none;' onchange='htmx.trigger(\"#media-form\", \"submit\")'>";
         echo "</form>";
+        echo "</div>";
         echo "</div>";
         echo "<div id='media-list' hx-get='api.php?action=list_media&path=$rel_path' hx-trigger='load'>";
         echo "</div>";
+        echo "<script>
+            var dropZone = document.getElementById('drop-zone');
+            var mediaInput = document.getElementById('media-input');
+            var mediaForm = document.getElementById('media-form');
+
+            dropZone.onclick = () => mediaInput.click();
+            dropZone.ondragover = (e) => { 
+                e.preventDefault(); 
+                dropZone.style.borderColor = 'var(--accent-pink)'; 
+                dropZone.style.background = 'rgba(255,0,200,0.05)'; 
+            };
+            dropZone.ondragleave = () => { 
+                dropZone.style.borderColor = 'var(--glass-border)'; 
+                dropZone.style.background = 'var(--glass-bg)'; 
+            };
+            dropZone.ondrop = (e) => {
+                e.preventDefault();
+                dropZone.style.borderColor = 'var(--glass-border)';
+                dropZone.style.background = 'var(--glass-bg)';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    const formData = new FormData();
+                    formData.append('media_file', e.dataTransfer.files[0]);
+                    
+                    fetch(mediaForm.getAttribute('hx-post'), {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('media-list').innerHTML = html;
+                        showToast('Upload concluído!');
+                    })
+                    .catch(err => showToast('Erro no upload!'));
+                }
+            };
+            
+            function copyToClipboard(relPath) {
+                const fullUrl = window.location.origin + window.location.pathname.replace(/index\.php|api\.php/, '') + relPath;
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    showToast('URL copiada: ' + fullUrl);
+                });
+            }
+
+            function showToast(msg) {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+        </script>";
         break;
+
 
 
     case 'list_media':
         requireAuth();
         $rel_path = $_GET['path'] ?? '';
-        $note = find_note_by_rel_path($rel_path);
-        if ($note && is_dir($note['folder'])) {
-            $files = scandir($note['folder']);
-            echo "<ul style='list-style: none; padding: 0;'>";
-            foreach ($files as $file) {
-                if ($file == "." || $file == ".." || str_ends_with($file, '.md')) continue;
-                echo "<li style='display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid var(--glass-border);'>";
-                echo "<span>$file</span>";
-                echo "<i class='fas fa-trash' hx-delete='api.php?action=delete_media&path=$rel_path&file=$file' hx-confirm='Excluir arquivo?' hx-target='#media-list' style='cursor: pointer; color: var(--accent-pink);'></i>";
-                echo "</li>";
-            }
-            echo "</ul>";
-        } else {
-            echo "<p>Nenhum arquivo de mídia ainda.</p>";
-        }
+        render_media_list($rel_path);
         break;
 
 
@@ -374,11 +447,13 @@ switch ($action) {
         $rel_path = $_GET['path'] ?? '';
         $note = find_note_by_rel_path($rel_path);
         if ($note && isset($_FILES['media_file'])) {
-            if (!is_dir($note['folder'])) mkdir($note['folder'], 0755, true);
-            $target = $note['folder'] . "/" . basename($_FILES['media_file']['name']);
+            $folder = str_replace('\\', '/', $note['folder']);
+            if (!is_dir($folder)) mkdir($folder, 0755, true);
+            $target = $folder . "/" . basename($_FILES['media_file']['name']);
             move_uploaded_file($_FILES['media_file']['tmp_name'], $target);
         }
-        echo "<script>htmx.trigger('#media-list', 'load');</script>";
+        // Render list directly
+        render_media_list($rel_path);
         break;
 
     case 'delete_media':
@@ -387,10 +462,11 @@ switch ($action) {
         $file = $_GET['file'] ?? '';
         $note = find_note_by_rel_path($rel_path);
         if ($note && $file) {
-            $target = $note['folder'] . "/" . $file;
+            $folder = str_replace('\\', '/', $note['folder']);
+            $target = $folder . "/" . $file;
             if (file_exists($target)) unlink($target);
         }
-        echo "<script>htmx.trigger('#media-list', 'load');</script>";
+        render_media_list($rel_path);
         break;
 
 
