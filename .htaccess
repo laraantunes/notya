@@ -1,15 +1,11 @@
 # Prevent directory listing
 Options -Indexes
 
-# Protect sensitive files
+# Protect sensitive files globally
 <FilesMatch "\.(json|md|env|log)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
-
-# Protect data directory
-RewriteEngine On
-RewriteRule ^data/.*$ - [F,L]
 
 # Redirect all requests to index.php if they don't exist
 RewriteCond %{REQUEST_FILENAME} !-f
