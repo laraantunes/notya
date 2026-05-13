@@ -215,11 +215,14 @@ function render_media_list($rel_path) {
 }
 
 function render_shortcuts_box() {
-    $html = "<div style='display: inline-block; text-align: left; background: var(--glass-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--glass-border); margin-top: 20px;'>";
+    $html = "<div style='display: block; max-width: 600px; margin: 20px auto; text-align: left; background: var(--glass-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--glass-border);'>";
     $html .= "<h3 style='color: var(--accent-purple); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;'>Atalhos de Teclado</h3>";
-    $html .= "<div style='display: grid; grid-template-columns: 1fr 1fr; gap: 20px;'>";
+    $html .= "<div style='display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; align-items: center;'>";
     $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + K</kbd></div><div style='color: white;'>Pesquisar Notas</div>";
     $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + Y</kbd></div><div style='color: white;'>Nova Nota (no item ativo)</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + S</kbd></div><div style='color: white;'>Salvar Nota</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + O</kbd></div><div style='color: white;'>Alternar Visual/Editor</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + H</kbd></div><div style='color: white;'>Abrir Ajuda</div>";
     $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Esc</kbd></div><div style='color: white;'>Fechar Janelas</div>";
     $html .= "</div>";
     $html .= "</div>";
@@ -303,6 +306,10 @@ switch ($action) {
         mkdir($path, 0755, true);
         file_put_contents("$path/info.json", json_encode(['id' => $id, 'title' => $_POST['title']]));
         echo render_notebook_list();
+        echo "<script>
+            hideModal();
+            navigateTo('$id', 'notebook');
+        </script>";
         break;
 
 
@@ -329,7 +336,13 @@ switch ($action) {
         if (!is_dir($fs_path)) mkdir($fs_path, 0755, true);
         
         file_put_contents("$fs_path/$id.md", "# $title\n\n");
+        $full_rel_path = ($parent_path ? $parent_path . "/" : "") . $id;
+
         echo render_notebook_list();
+        echo "<script>
+            hideModal();
+            navigateTo('$full_rel_path', 'note');
+        </script>";
         break;
 
 
@@ -481,6 +494,7 @@ switch ($action) {
             file_put_contents($note['file'], $full_content);
             // Return updated list to reflect title change in sidebar
             echo render_notebook_list();
+            echo "<script>originalContent = easyMDE.value(); showToast('Nota salva com sucesso!');</script>";
         }
         break;
 
@@ -568,6 +582,11 @@ switch ($action) {
             echo "<span>{$res['title']}</span>";
             echo "</div>";
         }
+        break;
+
+    case 'show_help':
+        requireAuth();
+        echo render_shortcuts_box();
         break;
 
     case 'show_user_edit':

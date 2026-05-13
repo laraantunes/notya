@@ -13,8 +13,9 @@
     </div>
     <div class="header-right">
         <button onclick="toggleSearch()" class="icon-btn" title="Pesquisar (Ctrl+K)"><i class="fas fa-search"></i></button>
-        <button hx-get="api.php?action=show_user_edit" hx-target="#modal-body" onclick="showModal()" class="icon-btn"><i class="fas fa-user-cog"></i></button>
-        <a href="index.php?page=logout" class="icon-btn" style="color: var(--text-secondary);"><i class="fas fa-sign-out-alt"></i></a>
+        <button hx-get="api.php?action=show_user_edit" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Configurações"><i class="fas fa-user-cog"></i></button>
+        <button hx-get="api.php?action=show_help" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Ajuda (Ctrl+H)"><i class="fas fa-question-circle"></i></button>
+        <a href="index.php?page=logout" class="icon-btn" style="color: var(--text-secondary);" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
     </div>
 </header>
 
@@ -52,3 +53,15 @@
 </div>
 
 <div id="toast">URL copiada!</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+        <h3 id="confirm-title" style="color: var(--accent-purple); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 20px;">Confirmação</h3>
+        <p id="confirm-message" style="margin-bottom: 30px; color: var(--text-secondary); line-height: 1.5;"></p>
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <button id="confirm-yes" style="background: linear-gradient(45deg, var(--accent-purple), var(--accent-pink)); flex: 1;">Sim</button>
+            <button id="confirm-no" style="background: var(--glass-bg); color: var(--text-secondary); border: 1px solid var(--glass-border); flex: 1;">Não</button>
+        </div>
+    </div>
+</div>

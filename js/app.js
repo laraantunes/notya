@@ -1,4 +1,5 @@
 let easyMDE;
+let originalContent = "";
 
 function toggleSearch() {
     const modal = document.getElementById('search-modal');
@@ -52,6 +53,26 @@ document.addEventListener('keydown', (e) => {
         } else {
             alert('Por favor, selecione um caderno ou nota primeiro.');
         }
+    }
+
+    // Ctrl+S or Cmd+S for Save
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const saveBtn = document.querySelector('button[hx-post*="action=save_note"]');
+        if (saveBtn) htmx.trigger(saveBtn, 'click');
+    }
+
+    // Ctrl+O or Cmd+O for Toggle View
+    if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+        e.preventDefault();
+        toggleEditorView();
+    }
+
+    // Ctrl+H or Cmd+H for Help
+    if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+        e.preventDefault();
+        htmx.ajax('GET', 'api.php?action=show_help', '#modal-body');
+        showModal();
     }
 
     // Escape key to close modals and search
@@ -140,6 +161,21 @@ window.addEventListener('load', () => {
 
 
 // HTMX events
+document.addEventListener('htmx:confirm', (e) => {
+    // If navigating to another note or notebook in the editor
+    if (e.detail.target.id === 'editor-content' && isNoteDirty()) {
+        e.preventDefault();
+        customConfirm(
+            "Alterações não salvas",
+            "Você tem alterações não salvas nesta nota. Deseja sair sem salvar?",
+            () => {
+                originalContent = easyMDE.value(); // Reset dirty state to allow navigation
+                e.detail.issueRequest();
+            }
+        );
+    }
+});
+
 document.addEventListener('htmx:beforeSwap', (e) => {
     if (e.detail.target.id === 'editor-content') {
         if (easyMDE) {
@@ -179,13 +215,60 @@ function initEditor(elementId) {
         minHeight: "400px",
         toolbar: ["bold", "italic", "heading", "|", "quote", "unordered-list", "ordered-list", "|", "link", "image", "table", "|", "guide"],
         previewRender: function(plainText) {
-            // Ensure images have the correct base path if needed
             return this.parent.markdown(plainText);
         }
     });
     
-    // Mark as initialized
     el.EasyMDE = easyMDE;
+    originalContent = easyMDE.value();
+}
+
+function navigateTo(path, type) {
+    const action = type === 'note' ? 'view_note' : 'view_notebook';
+    const param = type === 'note' ? 'path' : 'id';
+    const url = `api.php?action=${action}&${param}=${encodeURIComponent(path)}`;
+
+    if (isNoteDirty()) {
+        customConfirm(
+            "Alterações não salvas",
+            "Você tem alterações não salvas nesta nota. Deseja sair sem salvar?",
+            () => {
+                originalContent = easyMDE.value(); // Reset state
+                window.location.hash = path;
+                htmx.ajax('GET', url, '#editor-content');
+            }
+        );
+    } else {
+        window.location.hash = path;
+        htmx.ajax('GET', url, '#editor-content');
+    }
+}
+
+function isNoteDirty() {
+    if (!easyMDE) return false;
+    return easyMDE.value() !== originalContent;
+}
+
+function customConfirm(title, message, onYes, onNo) {
+    const modal = document.getElementById('confirm-modal');
+    if (!modal) return;
+    document.getElementById('confirm-title').innerText = title;
+    document.getElementById('confirm-message').innerText = message;
+    modal.classList.remove('hidden');
+    
+    const yesBtn = document.getElementById('confirm-yes');
+    const noBtn = document.getElementById('confirm-no');
+    
+    const cleanup = () => {
+        modal.classList.add('hidden');
+        const newYes = yesBtn.cloneNode(true);
+        const newNo = noBtn.cloneNode(true);
+        yesBtn.parentNode.replaceChild(newYes, yesBtn);
+        noBtn.parentNode.replaceChild(newNo, noBtn);
+    };
+    
+    document.getElementById('confirm-yes').onclick = () => { cleanup(); onYes(); };
+    document.getElementById('confirm-no').onclick = () => { cleanup(); if(onNo) onNo(); };
 }
 
 function toggleEditorView() {
