@@ -1,0 +1,19 @@
+# Notya Data
+data/
+data/users.json
+data/notebooks/
+
+# Logs
+error_log
+php_errors.log
+
+# Environment
+.env
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+vendor/
