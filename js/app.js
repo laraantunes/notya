@@ -17,6 +17,37 @@ function hideModal() {
     document.getElementById('generic-modal').classList.add('hidden');
 }
 
+function createNewNote() {
+    const activeItem = document.querySelector('.tree-header.active');
+    if (activeItem) {
+        const path = activeItem.closest('.tree-item').getAttribute('data-path');
+        htmx.ajax('GET', `api.php?action=show_create_note&path=${path}`, '#modal-body');
+        showModal();
+    } else {
+        alert('Por favor, selecione um caderno ou nota primeiro.');
+    }
+}
+
+function createNewNotebook() {
+    const action = () => {
+        htmx.ajax('GET', 'api.php?action=show_create_notebook', '#modal-body');
+        showModal();
+    };
+
+    if (isNoteDirty()) {
+        customConfirm(
+            "Alterações não salvas",
+            "Você tem alterações não salvas nesta nota. Deseja sair sem salvar?",
+            () => {
+                originalContent = easyMDE.value(); // Reset state
+                action();
+            }
+        );
+    } else {
+        action();
+    }
+}
+
 // Close modals when clicking outside
 document.addEventListener('mousedown', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
@@ -41,18 +72,7 @@ document.addEventListener('keydown', (e) => {
     // Ctrl+Y or Cmd+Y for New Note
     if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
         e.preventDefault();
-        const activeItem = document.querySelector('.tree-header.active');
-        if (activeItem) {
-            const id = activeItem.getAttribute('data-id');
-            const type = activeItem.getAttribute('data-type');
-            // Assuming we need the path for notes, or id for notebooks
-            // But show_create_note expects 'path' parameter
-            const path = activeItem.closest('.tree-item').getAttribute('data-path');
-            htmx.ajax('GET', `api.php?action=show_create_note&path=${path}`, '#modal-body');
-            showModal();
-        } else {
-            alert('Por favor, selecione um caderno ou nota primeiro.');
-        }
+        createNewNote();
     }
 
     // Ctrl+S or Cmd+S for Save
@@ -68,8 +88,38 @@ document.addEventListener('keydown', (e) => {
         toggleEditorView();
     }
 
-    // Ctrl+H or Cmd+H for Help
-    if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+    // Ctrl+E or Cmd+E for Toggle Sidebar
+    if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        document.getElementById('sidebar')?.classList.toggle('collapsed');
+    }
+
+    // Ctrl+U or Cmd+U for New Notebook
+    if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+        e.preventDefault();
+        createNewNotebook();
+    }
+
+    // Ctrl+D or Cmd+D for Media Modal
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        const activeItem = document.querySelector('.tree-header.active');
+        const path = activeItem?.closest('.tree-item')?.getAttribute('data-path');
+        if (path) {
+            htmx.ajax('GET', `api.php?action=show_media&path=${path}`, '#modal-body');
+            showModal();
+        }
+    }
+
+    // Ctrl+P or Cmd+P for Profile Settings
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        htmx.ajax('GET', 'api.php?action=show_user_edit', '#modal-body');
+        showModal();
+    }
+
+    // Ctrl+J or Cmd+J for Help
+    if ((e.ctrlKey || e.metaKey) && e.key === 'j') {
         e.preventDefault();
         htmx.ajax('GET', 'api.php?action=show_help', '#modal-body');
         showModal();
@@ -146,6 +196,9 @@ document.addEventListener('htmx:afterSettle', (e) => {
 });
 
 window.addEventListener('load', () => {
+    if (window.innerWidth <= 768) {
+        document.getElementById('sidebar')?.classList.add('collapsed');
+    }
     setTimeout(() => {
         const hash = window.location.hash.substring(1);
         if (hash && typeof htmx !== 'undefined') {

@@ -1,6 +1,6 @@
 <header id="global-header">
     <div class="header-left">
-        <button id="toggle-sidebar" class="icon-btn"><i class="fas fa-bars"></i></button>
+        <button id="toggle-sidebar" class="icon-btn" title="Alternar Menu (Ctrl+E)"><i class="fas fa-bars"></i></button>
         <h2 class="logo" style="color: var(--accent-pink); font-size: 1.5rem; cursor: pointer; margin-left: 10px; display: flex; align-items: center; gap: 10px;" 
             hx-get="api.php?action=show_home" hx-target="#editor-content" 
             onclick="window.location.hash = ''; document.querySelectorAll('.tree-header').forEach(h => h.classList.remove('active'));">
@@ -12,9 +12,11 @@
         <div id="current-path" style="color: var(--text-secondary); font-size: 0.9rem;">/ Início</div>
     </div>
     <div class="header-right">
+        <button onclick="createNewNotebook()" class="icon-btn" title="Novo Caderno (Ctrl+U)"><i class="fas fa-plus"></i></button>
+        <button onclick="createNewNote()" class="icon-btn" title="Nova Nota (Ctrl+Y)"><i class="fas fa-file"></i></button>
         <button onclick="toggleSearch()" class="icon-btn" title="Pesquisar (Ctrl+K)"><i class="fas fa-search"></i></button>
-        <button hx-get="api.php?action=show_user_edit" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Configurações"><i class="fas fa-user-cog"></i></button>
-        <button hx-get="api.php?action=show_help" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Ajuda (Ctrl+H)"><i class="fas fa-question-circle"></i></button>
+        <button hx-get="api.php?action=show_user_edit" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Configurações (Ctrl+P)"><i class="fas fa-user-cog"></i></button>
+        <button hx-get="api.php?action=show_help" hx-target="#modal-body" onclick="showModal()" class="icon-btn" title="Ajuda (Ctrl+J)"><i class="fas fa-question-circle"></i></button>
         <a href="index.php?page=logout" class="icon-btn" style="color: var(--text-secondary);" title="Sair"><i class="fas fa-sign-out-alt"></i></a>
     </div>
 </header>
@@ -25,7 +27,7 @@
             <!-- Notebooks tree will load here -->
         </div>
         <div class="sidebar-footer" style="padding: 10px; border-top: 1px solid var(--glass-border);">
-            <button hx-get="api.php?action=show_create_notebook" hx-target="#modal-body" onclick="showModal()" style="width: 100%;">
+            <button onclick="createNewNotebook()" style="width: 100%;" title="Novo Caderno (Ctrl+U)">
                 <i class="fas fa-plus"></i> Novo Caderno
             </button>
         </div>

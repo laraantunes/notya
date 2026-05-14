@@ -218,11 +218,15 @@ function render_shortcuts_box() {
     $html = "<div style='display: block; max-width: 600px; margin: 20px auto; text-align: left; background: var(--glass-bg); padding: 30px; border-radius: 15px; border: 1px solid var(--glass-border);'>";
     $html .= "<h3 style='color: var(--accent-purple); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;'>Atalhos de Teclado</h3>";
     $html .= "<div style='display: grid; grid-template-columns: auto 1fr; gap: 10px 20px; align-items: center;'>";
-    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + K</kbd></div><div style='color: white;'>Pesquisar Notas</div>";
-    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + Y</kbd></div><div style='color: white;'>Nova Nota (no item ativo)</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + K</kbd></div><div style='color: white;'>Pesquisar</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + U</kbd></div><div style='color: white;'>Novo Caderno</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + Y</kbd></div><div style='color: white;'>Nova Nota</div>";
     $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + S</kbd></div><div style='color: white;'>Salvar Nota</div>";
-    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + O</kbd></div><div style='color: white;'>Alternar Visual/Editor</div>";
-    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + H</kbd></div><div style='color: white;'>Abrir Ajuda</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + D</kbd></div><div style='color: white;'>Mídia/Arquivos</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + O</kbd></div><div style='color: white;'>Visualização</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + E</kbd></div><div style='color: white;'>Alternar Menu</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + P</kbd></div><div style='color: white;'>Configurações</div>";
+    $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Ctrl + J</kbd></div><div style='color: white;'>Ajuda</div>";
     $html .= "<div><kbd style='background: var(--accent-pink); color: black; padding: 2px 6px; border-radius: 4px; font-weight: bold;'>Esc</kbd></div><div style='color: white;'>Fechar Janelas</div>";
     $html .= "</div>";
     $html .= "</div>";
@@ -363,9 +367,9 @@ switch ($action) {
             echo "<div style='display: flex; justify-content: space-between; align-items: center; gap: 20px;'>";
             echo "<input type='text' id='note-title' value=\"$title\" style='font-size: 1.5rem; font-weight: bold; flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--glass-border); padding: 5px; color: var(--accent-pink);' placeholder='Título da Nota'>";
             echo "<div style='display: flex; gap: 10px;'>";
-            echo "<button onclick='showModal()' hx-get='api.php?action=show_media&path=$rel_path' hx-target='#modal-body' style='background: var(--glass-bg); color: var(--accent-pink);'><i class='fas fa-paperclip'></i> Mídia</button>";
-            echo "<button hx-post='api.php?action=save_note&path=$rel_path' hx-vals='js:{content: easyMDE.value(), title: document.getElementById(\"note-title\").value}' hx-target='#notebooks-list'>Salvar Nota</button>";
-            echo "<button id='btn-toggle-view' onclick='toggleEditorView()' style='background: var(--glass-bg); color: var(--accent-purple); border: 1px solid var(--accent-purple); padding: 8px 15px; border-radius: 8px; cursor: pointer;'><i class='fas fa-eye'></i> Visual</button>";
+            echo "<button onclick='showModal()' hx-get='api.php?action=show_media&path=$rel_path' hx-target='#modal-body' style='background: var(--glass-bg); color: var(--accent-pink);' title='Mídia (Ctrl+D)'><i class='fas fa-paperclip'></i> Mídia</button>";
+            echo "<button hx-post='api.php?action=save_note&path=$rel_path' hx-vals='js:{content: easyMDE.value(), title: document.getElementById(\"note-title\").value}' hx-target='#notebooks-list' title='Salvar (Ctrl+S)'>Salvar Nota</button>";
+            echo "<button id='btn-toggle-view' onclick='toggleEditorView()' style='background: var(--glass-bg); color: var(--accent-purple); border: 1px solid var(--accent-purple); padding: 8px 15px; border-radius: 8px; cursor: pointer;' title='Alternar Visualização (Ctrl+O)'><i class='fas fa-eye'></i> Visual</button>";
             echo "</div>";
             echo "</div>";
 
